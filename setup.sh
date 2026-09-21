@@ -1,6 +1,18 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -e
 
+# 다른 디렉터리로 cd 하기 전에 현재 스크립트 위치를 절대 경로로 확정
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+# 예외 처리: 혹시 $SCRIPT_DIR/run_hub.sh가 없으면 저장소 폴더 탐색
+if [ ! -f "$SCRIPT_DIR/run_hub.sh" ]; then
+  if [ -f "$HOME/apo-hub/run_hub.sh" ]; then
+    SCRIPT_DIR="$HOME/apo-hub"
+  elif [ -f "$HOME/apocalypse-hub/run_hub.sh" ]; then
+    SCRIPT_DIR="$HOME/apocalypse-hub"
+  fi
+fi
+
 echo ">>> 1. Termux 환경 및 의존성 패키지 확인 중..."
 termux-wake-lock
 
@@ -83,7 +95,6 @@ else
 fi
 
 echo ">>> 4. 실행 권한 설정 및 심볼릭 링크 생성..."
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 chmod +x "$SCRIPT_DIR/run_hub.sh"
 ln -sf "$SCRIPT_DIR/run_hub.sh" "$HOME/run_hub.sh"
 
