@@ -58,6 +58,12 @@ echo "=========================================================="
 echo "=== 아포칼립스 허브 가동 중 (Gemma 4 E4B) ==="
 cd "$LLAMA_DIR"
 
+DEVICE_FLAG=""
+if [ "$NGL" -eq 0 ]; then
+  DEVICE_FLAG="--device none"
+  export GGML_DISABLE_VULKAN=1
+fi
+
 ./build/bin/llama-server \
   -m "$MODEL_DIR/gemma-4-E4B-it-Q4_K_M.gguf" \
   --mmproj "$MODEL_DIR/mmproj-BF16.gguf" \
@@ -65,6 +71,7 @@ cd "$LLAMA_DIR"
   --port 8080 \
   -c 8192 \
   -ngl "$NGL" \
+  $DEVICE_FLAG \
   -t 6 \
   --jinja \
   --chat-template-kwargs "{\"enable_thinking\":$THINKING}"
