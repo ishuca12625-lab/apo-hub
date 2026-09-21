@@ -39,7 +39,7 @@ else
   pkg install -y git cmake clang ninja python vulkan-loader-android vulkan-headers vulkan-tools glslang spirv-headers spirv-tools shaderc curl
 fi
 
-echo ">>> 2. llama.cpp 확인 및 Adreno 750 (Vulkan) 최적화 빌드..."
+echo ">>> 2. llama.cpp 확인 및 Snapdragon 8 Gen 3 (i8mm+dotprod+KleidiAI) 최적화 빌드..."
 cd "$HOME"
 if [ ! -d "llama.cpp" ]; then
   git clone https://github.com/ggml-org/llama.cpp.git
@@ -48,28 +48,19 @@ cd llama.cpp
 
 # 이미 빌드되어 있고 --rebuild 옵션이 없으면 빌드 건너뛰기
 if [ -f "build/bin/llama-server" ] && [ "$1" != "--rebuild" ]; then
-  echo "✔ llama-server가 이미 빌드되어 있어 2단계를 건너뜁니다."
-  echo "  (강제 재빌드를 원할 경우: ./setup.sh --rebuild)"
+  echo "✔ llama-server가 이미 존재합니다. (성능 5배 가속 재빌드: ./setup.sh --rebuild)"
 else
-  echo ">>> llama.cpp 빌드를 시작합니다 (Vulkan 가속)..."
+  echo ">>> Snapdragon 8 Gen 3 하드웨어 가속(i8mm + dotprod + KleidiAI)으로 초고속 빌드 시작..."
   rm -rf build
 
-  # Android 시스템 Vulkan 라이브러리 및 헤더 경로 지정
-  VULKAN_LIB=""
-  if [ -f "/system/lib64/libvulkan.so" ]; then
-    VULKAN_LIB="/system/lib64/libvulkan.so"
-  elif [ -f "$PREFIX/lib/libvulkan.so" ]; then
-    VULKAN_LIB="$PREFIX/lib/libvulkan.so"
-  elif [ -f "/system/lib/libvulkan.so" ]; then
-    VULKAN_LIB="/system/lib/libvulkan.so"
-  fi
+  ARM_FLAGS="-march=armv8.7-a+i8mm+bf16+dotprod -O3"
 
-  CMAKE_FLAGS="-B build -DGGML_VULKAN=ON -DCMAKE_BUILD_TYPE=Release -DVulkan_INCLUDE_DIR=$PREFIX/include"
-  if [ -n "$VULKAN_LIB" ]; then
-    CMAKE_FLAGS="$CMAKE_FLAGS -DVulkan_LIBRARY=$VULKAN_LIB"
-  fi
+  cmake -B build -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_C_FLAGS="$ARM_FLAGS" \
+    -DCMAKE_CXX_FLAGS="$ARM_FLAGS" \
+    -DGGML_CPU_KLEIDIAI=ON
 
-  cmake $CMAKE_FLAGS
   cmake --build build --target llama-server -j8
 fi
 

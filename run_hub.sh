@@ -10,18 +10,29 @@ LOG_FILE="$HOME/run_hub.log"
 HOST="127.0.0.1"
 NGL=0
 THINKING="false"
+THREADS=4
 
-# 인자 처리 (--lan, --gpu, --think)
-for arg in "$@"; do
-  case "$arg" in
+# 인자 처리 (--lan, --gpu, --think, -t)
+while [ $# -gt 0 ]; do
+  case "$1" in
     --lan|-l)
       HOST="0.0.0.0"
+      shift
       ;;
     --gpu)
       NGL=99
+      shift
       ;;
     --think|-th)
       THINKING="true"
+      shift
+      ;;
+    -t)
+      THREADS="$2"
+      shift 2
+      ;;
+    *)
+      shift
       ;;
   esac
 done
@@ -75,6 +86,6 @@ fi
   -np 1 \
   -ngl "$NGL" \
   $DEVICE_FLAG \
-  -t 6 \
+  -t "$THREADS" \
   --jinja \
   --chat-template-kwargs "{\"enable_thinking\":$THINKING}" 2>&1 | tee "$LOG_FILE"
