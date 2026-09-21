@@ -1,10 +1,31 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -e
 
-echo ">>> 1. Termux 환경 및 의존성 패키지 설치 중..."
+echo ">>> 1. Termux 환경 및 의존성 패키지 확인 중..."
 termux-wake-lock
-pkg update -y && pkg upgrade -y
-pkg install -y git cmake clang ninja python vulkan-loader-android vulkan-headers vulkan-tools glslang spirv-headers spirv-tools shaderc curl
+
+# 필수 실행 바이너리 및 핵심 헤더 존재 여부 확인
+REQUIRED_BINS="git cmake clang ninja python glslc curl vulkaninfo"
+MISSING_DEPS=0
+
+for bin in $REQUIRED_BINS; do
+  if ! command -v "$bin" >/dev/null 2>&1; then
+    MISSING_DEPS=1
+    break
+  fi
+done
+
+if [ ! -f "$PREFIX/include/vulkan/vulkan.h" ] || [ ! -f "$PREFIX/include/spirv/unified1/spirv.h" ]; then
+  MISSING_DEPS=1
+fi
+
+if [ "$MISSING_DEPS" -eq 0 ] && [ "$1" != "--update-pkgs" ]; then
+  echo "✔ 필수 패키지와 헤더가 이미 설치되어 있어 1단계를 건너뜁니다."
+else
+  echo ">>> 필요한 패키지를 설치 및 업데이트합니다..."
+  pkg update -y
+  pkg install -y git cmake clang ninja python vulkan-loader-android vulkan-headers vulkan-tools glslang spirv-headers spirv-tools shaderc curl
+fi
 
 echo ">>> 2. llama.cpp 확인 및 Adreno 750 (Vulkan) 최적화 빌드..."
 cd "$HOME"
