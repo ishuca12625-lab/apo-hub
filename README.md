@@ -30,7 +30,7 @@ apocalypse-hub/
 ## ⚙️ 주요 구성 요소
 
 ### 1. `setup.sh`
-- **의존성 설치**: `git`, `cmake`, `clang`, `ninja`, `python`, `vulkan-loader-android`, `curl`
+- **의존성 설치**: `git`, `cmake`, `clang`, `ninja`, `python`, `vulkan-loader-android`, `vulkan-headers`, `shaderc`, `curl`
 - **llama.cpp 빌드**: Adreno 750 GPU 가속을 위한 Vulkan 백엔드(`-DGGML_VULKAN=ON`)로 컴파일
 - **멀티모달 모델 다운로드**: HuggingFace Unsloth 저장소에서 `gemma-4-E4B-it-Q4_K_M.gguf` 및 `mmproj-BF16.gguf` 다운로드 (이어받기 `-C -` 지원)
 - **실행 링크 등록**: `~/run_hub.sh` 심볼릭 링크 자동 생성

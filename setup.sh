@@ -4,7 +4,7 @@ set -e
 echo ">>> 1. Termux 환경 및 의존성 패키지 설치 중..."
 termux-wake-lock
 pkg update -y && pkg upgrade -y
-pkg install -y git cmake clang ninja python vulkan-loader-android curl
+pkg install -y git cmake clang ninja python vulkan-loader-android vulkan-headers shaderc curl
 
 echo ">>> 2. llama.cpp 다운로드 및 Adreno 750 (Vulkan) 최적화 빌드 중..."
 cd "$HOME"
@@ -12,7 +12,23 @@ if [ ! -d "llama.cpp" ]; then
   git clone https://github.com/ggerganov/llama.cpp.git
 fi
 cd llama.cpp
-cmake -B build -DGGML_VULKAN=ON
+
+# Android 시스템 Vulkan 라이브러리 및 헤더 경로 지정
+VULKAN_LIB=""
+if [ -f "/system/lib64/libvulkan.so" ]; then
+  VULKAN_LIB="/system/lib64/libvulkan.so"
+elif [ -f "$PREFIX/lib/libvulkan.so" ]; then
+  VULKAN_LIB="$PREFIX/lib/libvulkan.so"
+elif [ -f "/system/lib/libvulkan.so" ]; then
+  VULKAN_LIB="/system/lib/libvulkan.so"
+fi
+
+CMAKE_FLAGS="-B build -DGGML_VULKAN=ON -DCMAKE_BUILD_TYPE=Release -DVulkan_INCLUDE_DIR=$PREFIX/include"
+if [ -n "$VULKAN_LIB" ]; then
+  CMAKE_FLAGS="$CMAKE_FLAGS -DVulkan_LIBRARY=$VULKAN_LIB"
+fi
+
+cmake $CMAKE_FLAGS
 cmake --build build --target llama-server -j8
 
 echo ">>> 3. Gemma 4 E4B 멀티모달 모델 다운로드 중 (이어받기 지원)..."
