@@ -12,7 +12,7 @@ cd "$LLAMA_DIR"
 ./build/bin/llama-server \
   -m "$MODEL_DIR/gemma-4-E4B-it-Q4_K_M.gguf" \
   --mmproj "$MODEL_DIR/mmproj-BF16.gguf" \
-  --host 127.0.0.1 \
+  --host 0.0.0.0 \
   --port 8080 \
   -c 8192 \
   -ngl 99 \
