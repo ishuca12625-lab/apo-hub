@@ -5,6 +5,7 @@ termux-wake-lock
 BASE_DIR="$(cd "$(dirname "$0")" && pwd)"
 LLAMA_DIR="$HOME/llama.cpp"
 MODEL_DIR="$HOME/models"
+LOG_FILE="$HOME/run_hub.log"
 
 HOST="127.0.0.1"
 NGL=0
@@ -53,6 +54,7 @@ else
   echo " [사고 모드] OFF (초고속 즉답 모드 - 일상 대화/비전)"
   echo "   - ※ 심층 추론 활성화 시: ~/run_hub.sh --think"
 fi
+echo " [로그 파일] $LOG_FILE (종료 후에도 cat ~/run_hub.log 로 확인 가능)"
 echo "=========================================================="
 
 echo "=== 아포칼립스 허브 가동 중 (Gemma 4 E4B) ==="
@@ -69,9 +71,10 @@ fi
   --mmproj "$MODEL_DIR/mmproj-BF16.gguf" \
   --host "$HOST" \
   --port 8080 \
-  -c 8192 \
+  -c 4096 \
+  -np 1 \
   -ngl "$NGL" \
   $DEVICE_FLAG \
   -t 6 \
   --jinja \
-  --chat-template-kwargs "{\"enable_thinking\":$THINKING}"
+  --chat-template-kwargs "{\"enable_thinking\":$THINKING}" 2>&1 | tee "$LOG_FILE"
