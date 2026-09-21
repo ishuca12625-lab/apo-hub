@@ -1,0 +1,3 @@
+# Ensure bash scripts maintain LF line endings across Windows and Linux/Android
+*.sh text eol=lf
+*.md text
