@@ -4,14 +4,17 @@ set -e
 echo ">>> 1. Termux 환경 및 의존성 패키지 설치 중..."
 termux-wake-lock
 pkg update -y && pkg upgrade -y
-pkg install -y git cmake clang ninja python vulkan-loader-android vulkan-headers shaderc curl
+pkg install -y git cmake clang ninja python vulkan-loader-android vulkan-headers vulkan-tools glslang spirv-headers spirv-tools shaderc curl
 
 echo ">>> 2. llama.cpp 다운로드 및 Adreno 750 (Vulkan) 최적화 빌드 중..."
 cd "$HOME"
 if [ ! -d "llama.cpp" ]; then
-  git clone https://github.com/ggerganov/llama.cpp.git
+  git clone https://github.com/ggml-org/llama.cpp.git
 fi
 cd llama.cpp
+
+# 이전 실패한 캐시가 남아있을 경우 제거
+rm -rf build
 
 # Android 시스템 Vulkan 라이브러리 및 헤더 경로 지정
 VULKAN_LIB=""
